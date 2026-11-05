@@ -581,7 +581,7 @@ void __time_critical_func(on_pwm_wrap)() {
    // Finds nextState from target
    if (target < 100) { // Negative pulses
         nextState = negCycle;
-        delay = (target - 100) * 5; // Delay in PIO cycles @ 25 MHz
+        delay = (100 - target) * 5; // Delay in PIO cycles @ 25 MHz
     } else { // Positive pulses
         nextState = possCycle;
         delay = (target - 100) * 5; // Delay in PIO cycles @ 25 MHz
@@ -589,14 +589,15 @@ void __time_critical_func(on_pwm_wrap)() {
 
     // Sets Lower bound on DCP (1 us + switching time)/20 us ~7.5%
     if (delay < 25) {
-        if (delay > 12 && last_state == 0) { 
-            // Subdivides the lower bound "dead zone" into two sections and emulates 3.75% power for that zone
-            delay = 25;
-            last_state = 1;
-        } else {
-            nextState = freeCycle;
-            last_state = 0;
-        }
+        nextState = freeCycle;
+        // if (delay > 12 && last_state == 0) { 
+        //     // Subdivides the lower bound "dead zone" into two sections and emulates 3.75% power for that zone
+        //     delay = 25;
+        //     last_state = 1;
+        // } else {
+        //     nextState = freeCycle;
+        //     last_state = 0;
+        // }
     } else {
         // Sets Upper bound on DCP (18 us + switching time)/20 us ~92.5%
         if (delay > 450) {delay = 450;}     
@@ -687,8 +688,8 @@ void run_shot(uint16_t pulseCycles) {
    const float scale_factor = 100.0f; // Scales ADC result to -100 - 100 range (TODO: Confirm this)
 
     // Loads freewheeling as first PWM pulse
-    delay = 250;
-    nextState = (stop2free << 24) | (( delay << 8) | free2stop);
+    // delay = 250;
+    // nextState = (stop2free << 24) | (( delay << 8) | free2stop);
 
 
     // Set up PID
